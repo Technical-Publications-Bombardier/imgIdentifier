@@ -1,5 +1,7 @@
 package com.xmltools;
 
+import me.tongfei.progressbar.ProgressBar;
+
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -27,24 +29,27 @@ public class ImageTypeIdentifier {
 						System.err.println("Invalid folder path.");
 						return;
 				}
+try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", folder.getName()) , files.length)){
+    for (File file : files) {
+        bar.step();
+        if (file.isDirectory()) {
+            processFolder(file);
+        } else if (file.isFile() && file.getName().endsWith(".xxx")) {
+            String newExtension = getImageType(file);
+            if (newExtension != null) {
+                String newFileName = file.getName().replace(".xxx", "." + newExtension);
+                File newFile = new File(file.getParent(), newFileName);
 
-				for (File file : files) {
-						if (file.isDirectory()) {
-								processFolder(file);
-						} else if (file.isFile() && file.getName().endsWith(".xxx")) {
-								String newExtension = getImageType(file);
-								if (newExtension != null) {
-										String newFileName = file.getName().replace(".xxx", "." + newExtension);
-										File newFile = new File(file.getParent(), newFileName);
+                if (file.renameTo(newFile)) {
+                    System.out.println("Renamed: " + file.getName() + " -> " + newFileName);
+                } else {
+                    System.err.println("Failed to rename: " + file.getName());
+                }
+            }
+        }
+    }
+}
 
-										if (file.renameTo(newFile)) {
-												System.out.println("Renamed: " + file.getName() + " -> " + newFileName);
-										} else {
-												System.err.println("Failed to rename: " + file.getName());
-										}
-								}
-						}
-				}
 		}
 
 		public static String getImageType(File file) {
@@ -55,20 +60,20 @@ public class ImageTypeIdentifier {
 								String formatName = reader.getFormatName().toLowerCase();
 
 								reader.setInput(iis);
-								int numImages = reader.getNumImages(true);
-
-								if (formatName.equals("jpeg") || formatName.equals("jpg")) {
-										return "jpg";
-								} else if (formatName.equals("gif")) {
-										return "gif";
-								} else if (formatName.equals("bmp")) {
-										return "bmp";
-								} else if (formatName.equals("png")) {
-										return "png";
-								} else {
-										System.err.println("Unknown image type: [" + file.getName() + "] Type name :" + formatName);
-										return null;
-								}
+                            switch (formatName) {
+                                case "jpeg":
+                                case "jpg":
+                                    return "jpg";
+                                case "gif":
+                                    return "gif";
+                                case "bmp":
+                                    return "bmp";
+                                case "png":
+                                    return "png";
+                                default:
+                                    System.err.println("Unknown image type: [" + file.getName() + "] Type name :" + formatName);
+                                    return null;
+                            }
 						} else if (getAIImageType(file)!=null) {
 								return "eps";
 						} else {
