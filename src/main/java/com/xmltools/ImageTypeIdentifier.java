@@ -78,7 +78,8 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 						}
 				} catch (IOException e) {
 						System.err.printf("Error reading the file: '%s'%n",file.getName());
-						e.printStackTrace();
+					//noinspection CallToPrintStackTrace
+					e.printStackTrace();
 						return null;
 				}
 		}
