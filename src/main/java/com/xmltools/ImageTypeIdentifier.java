@@ -60,20 +60,16 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 								String formatName = reader.getFormatName().toLowerCase();
 
 								reader.setInput(iis);
-                            switch (formatName) {
-                                case "jpeg":
-                                case "jpg":
-                                    return "jpg";
-                                case "gif":
-                                    return "gif";
-                                case "bmp":
-                                    return "bmp";
-                                case "png":
-                                    return "png";
-                                default:
+                            return switch (formatName) {
+                                case "jpeg", "jpg" -> "jpg";
+                                case "gif" -> "gif";
+                                case "bmp" -> "bmp";
+                                case "png" -> "png";
+                                default -> {
                                     System.err.println("Unknown image type: [" + file.getName() + "] Type name :" + formatName);
-                                    return null;
-                            }
+                                    yield null;
+                                }
+                            };
 						} else if (getAIImageType(file)!=null) {
 								return "eps";
 						} else {
@@ -81,7 +77,7 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 								return null;
 						}
 				} catch (IOException e) {
-						System.err.println("Error reading the file: " + file.getName());
+						System.err.printf("Error reading the file: '%s'%n",file.getName());
 						e.printStackTrace();
 						return null;
 				}
