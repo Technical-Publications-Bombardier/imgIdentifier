@@ -11,6 +11,7 @@
         <!-- Set the language level to Java 8 -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <jcgm.version>1.0.1</jcgm.version>
     </properties>
     <dependencies>
         <dependency>
@@ -18,12 +19,41 @@
             <artifactId>progressbar</artifactId>
             <version>0.10.0</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.jcgm.core</groupId>
+            <artifactId>jcgm-core</artifactId>
+            <version>${jcgm.version}</version>
+        </dependency>
     </dependencies>
     <!-- ... -->
 
         <build>
 
             <plugins>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <executions>
+                        <execution>
+                            <id>exec-powershell-script</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>powershell.exe</executable>
+                                <arguments>
+                                    <argument>-ExecutionPolicy</argument>
+                                    <argument>Bypass</argument>
+                                    <argument>-File</argument>
+                                    <argument>${project.basedir}/scripts/downloadDeps.ps1</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>3.7.0</version>
