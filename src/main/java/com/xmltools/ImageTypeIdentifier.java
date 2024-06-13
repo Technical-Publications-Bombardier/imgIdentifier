@@ -5,11 +5,10 @@ import me.tongfei.progressbar.ProgressBar;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
+
+import net.sf.jcgm.core.CGM;
 
 public class ImageTypeIdentifier {
 		public static void main(String[] args) {
@@ -70,11 +69,14 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
                                     yield null;
                                 }
                             };
-						} else if (getAIImageType(file)!=null) {
-								return "eps";
 						} else {
+							var imageType = getAIImageType(file);
+							if (imageType != null) {
+								return imageType;
+							} else {
 								System.err.println("No suitable ImageReader found for: " + file.getName());
 								return null;
+							}
 						}
 				} catch (IOException e) {
 						System.err.printf("Error reading the file: '%s'%n",file.getName());
@@ -85,15 +87,34 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 		}
 
 
-		public static String getAIImageType(File file) {
-				try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-						String firstLine = reader.readLine();
-						if (firstLine != null && firstLine.matches("%!PS-Adobe-\\d\\.\\d EPSF-\\d\\.\\d")) {
-								return "eps";
-						}
-				} catch (IOException e) {
-						System.err.println("No eps header found for file: " + file.getName());
-				}
-				return null;
+	public static String getAIImageType(File file) {
+		String epsPattern = "%!PS-Adobe-\\d\\.\\d EPSF-\\d\\.\\d";
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String firstLine = reader.readLine();
+			if (firstLine != null && firstLine.matches(epsPattern)) {
+				return "eps";
+			} else {
+				System.err.println("No eps header found for file: " + file.getName());
+				return checkForCGM(file);
+			}
+		} catch (IOException e) {
+			System.err.println("Failed to read file: " + file.getName());
 		}
+		return null;
+	}
+
+	private static String checkForCGM(File file) {
+		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+			CGM cgm = new CGM();
+			cgm.read(in);
+			return "cgm";
+		} catch (FileNotFoundException e) {
+			System.err.println("File not found: " + file.getName());
+		} catch (IOException e) {
+			System.err.println("Unidentified file type: " + file.getName());
+		}
+		return null;
+	}
+
 }
