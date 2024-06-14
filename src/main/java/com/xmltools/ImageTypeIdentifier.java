@@ -110,7 +110,7 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 			return "cgm";
 		} catch (FileNotFoundException e) {
 			System.err.println("File not found: " + file.getName());
-		} catch (IOException e) {
+		} catch (Exception ignoredException) {
 			System.err.println("Unidentified file type: " + file.getName());
 		}
 		return null;
