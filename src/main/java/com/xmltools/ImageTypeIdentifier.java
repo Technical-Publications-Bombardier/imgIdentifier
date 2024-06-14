@@ -95,7 +95,6 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 			if (firstLine != null && firstLine.matches(epsPattern)) {
 				return "eps";
 			} else {
-				System.err.println("No eps header found for file: " + file.getName());
 				return checkForCGM(file);
 			}
 		} catch (IOException e) {
