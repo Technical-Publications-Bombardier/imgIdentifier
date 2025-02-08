@@ -1,98 +1,95 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>xmlTools</groupId>
-    <artifactId>imageTools</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <properties>
-        <!-- Set the language level to Java 8 -->
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <jcgm.version>1.0.1</jcgm.version>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>me.tongfei</groupId>
-            <artifactId>progressbar</artifactId>
-            <version>0.10.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.jcgm.core</groupId>
-            <artifactId>jcgm-core</artifactId>
-            <version>${jcgm.version}</version>
-        </dependency>
-    </dependencies>
-    <!-- ... -->
-
-        <build>
-
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.0.0</version>
-                    <executions>
-                        <execution>
-                            <id>exec-powershell-script</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>exec</goal>
-                            </goals>
-                            <configuration>
-                                <executable>powershell.exe</executable>
-                                <arguments>
-                                    <argument>-ExecutionPolicy</argument>
-                                    <argument>Bypass</argument>
-                                    <argument>-File</argument>
-                                    <argument>${project.basedir}/scripts/downloadDeps.ps1</argument>
-                                </arguments>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.7.0</version>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <mainClass>com.xmltools.ImageTypeIdentifier</mainClass>
-                            </manifest>
-                        </archive>
-                        <descriptorRefs>
-                            <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>make-assembly</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <!-- Specify your main class here -->
-                                <mainClass>com.xmltools.ImageTypeIdentifier</mainClass>
-                            </manifest>
-                        </archive>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-
-        <!-- ... -->
-
-
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>xmlTools</groupId>
+  <artifactId>imageTools</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <properties>
+    <!-- Set the language level to Java 8 -->
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <jcgm.version>2.0.3</jcgm.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>me.tongfei</groupId>
+      <artifactId>progressbar</artifactId>
+      <version>0.10.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jcgm.core</groupId>
+      <artifactId>jcgm-core</artifactId>
+      <version>${jcgm.version}</version>
+    </dependency>
+  </dependencies>
+  <!-- ... -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>exec-powershell-script</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>pwsh.exe</executable>
+              <arguments>
+                <argument>-NoProfile</argument>
+                <argument>-WorkingDirectory</argument>
+                <argument>${project.basedir}</argument>
+                <argument>-NoLogo</argument>
+                <argument>-NonInteractive</argument>
+                <argument>-ExecutionPolicy</argument>
+                <argument>Bypass</argument>
+                <argument>-File</argument>
+                <argument>${project.basedir}/scripts/downloadDeps.ps1</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.xmltools.ImageTypeIdentifier</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- Specify your main class here -->
+              <mainClass>com.xmltools.ImageTypeIdentifier</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <!-- ... -->
 </project>
