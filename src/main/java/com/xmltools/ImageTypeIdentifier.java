@@ -103,8 +103,13 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 		return null;
 	}
 
-	private static String checkForCGM(File file) {
+	static String checkForCGM(File file) {
 		try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+			// Check if the file is empty
+			if (in.available() == 0) {
+				System.err.println("Empty file: " + file.getName());
+				return null;
+			}
 			CGM cgm = new CGM();
 			cgm.read(in);
 			return "cgm";
