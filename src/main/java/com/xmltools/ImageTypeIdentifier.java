@@ -6,7 +6,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.jcgm.core.CGM;
 
@@ -89,10 +92,14 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 
 	public static String getAIImageType(File file) {
 		String epsPattern = "%!?PS-Adobe-[\\d.]+\\s+EPSF-[\\d.]+";
-
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		// Use Pattern and Matcher for flexible matching
+		Pattern pattern = Pattern.compile(epsPattern);
+		try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 			String firstLine = reader.readLine();
-			if (firstLine != null && firstLine.matches(epsPattern)) {
+			// Sanitize the input by removing non-printable characters
+			firstLine = firstLine.replaceAll("[^\\x20-\\x7E]", ""); // Keep only printable ASCII chars
+			Matcher matcher = pattern.matcher(firstLine);
+			if (matcher.find()) {
 				return "eps";
 			} else {
 				return checkForCGM(file);
