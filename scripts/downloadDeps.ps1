@@ -12,14 +12,14 @@ Invoke-RestMethod -Uri 'https://api.github.com/repos/SwissAS/jcgm-core/releases/
 $LatestJCGMCoreJars = $LatestJCGMCore.assets | Where-Object { $_.name -like '*.jar' }
 $jcgmLatestVersion = $LatestJCGMCoreJars.name -replace '.*?([\d\.]+).*', '$1' -replace '\.$' | Select-Object -First 1
 Write-Verbose -Message "Found $( $LatestJCGMCoreJars.Count ) assets for JCGM-Core version '$jcgmLatestVersion'" -Verbose
-[xml]$pom = Get-Content -Path .\..\pom.xml
+[xml]$pom = Get-Content -Path "$PSScriptRoot\..\pom.xml"
 $pomVersion = $pom.project.properties.'jcgm.version'
 Write-Verbose -Message "Current POM version of jcgm is '$pomVersion'" -Verbose
 $jcgmMvnPath = "$env:USERPROFILE\.m2\repository\net\sf\jcgm\core\jcgm-core\*\*.jar"
 if (-not (Test-Path -Path ($jcgmMvnPath -replace '\\\*(?=\\\*\.jar)', "\$jcgmLatestVersion") -PathType Leaf -Verbose) -or $pomVersion -ne $jcgmLatestVersion) {
     Write-Verbose -Message 'Updating project jcgm version' -Verbose
     $pom.project.properties.'jcgm.version' = $jcgmLatestVersion
-    $pom.Save(((Get-Item -Path '.\..\pom.xml').FullName))
+    $pom.Save(((Get-Item -Path "$PSScriptRoot\..\pom.xml").FullName))
     foreach ($JCGMCoreJar in $LatestJCGMCoreJars) {
         Write-Verbose -Message "Downloading '$( $JCGMCoreJar.name )'" -Verbose
         $jarPath = $JCGMCoreJar.name
