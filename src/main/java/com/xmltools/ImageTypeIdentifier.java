@@ -88,7 +88,7 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 
 
 	public static String getAIImageType(File file) {
-		String epsPattern = "%!PS-Adobe-\\d\\.\\d EPSF-\\d\\.\\d";
+		String epsPattern = "%!?PS-Adobe-[\\d.]+\\s+EPSF-[\\d.]+";
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String firstLine = reader.readLine();
