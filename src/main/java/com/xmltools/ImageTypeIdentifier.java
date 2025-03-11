@@ -96,6 +96,7 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 		Pattern pattern = Pattern.compile(epsPattern);
 		try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 			String firstLine = reader.readLine();
+			firstLine += reader.readLine();  // Add the second line
 			// Sanitize the input by removing non-printable characters
 			firstLine = firstLine.replaceAll("[^\\x20-\\x7E]", ""); // Keep only printable ASCII chars
 			Matcher matcher = pattern.matcher(firstLine);
