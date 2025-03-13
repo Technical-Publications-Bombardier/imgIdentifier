@@ -1,0 +1,46 @@
+name: Java Maven Package
+
+on:
+  push:
+    branches: [ "master", "shade" ]
+  pull_request:
+    branches: [ "master", "shade" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'liberica'
+        java-version: '21'
+        
+    - name: Cache local Maven repository
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Build with Maven
+      run: mvn package
+      
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ github.ref_name }}  # Use the current tag as the release tag
+        name: Release ${{ github.ref_name }}  # Set release name
+        body: "This release includes the imgTools package. Download the ZIP file to use the tool."  # Release notes
+        artifacts: imageTools*-jar-with-dependencies.jar  # Path to the jar file
+        replacesArtifacts: true  # Replace existing artifacts if needed
+        allowUpdates: true  # Allow updates to existing releases
+        generateReleaseNotes: true # Have GitHub automatically create a changelog for the release based on commits between the current tag and the previous one.
+        draft: false  # Set to true if you want the release to be in draft mode
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
