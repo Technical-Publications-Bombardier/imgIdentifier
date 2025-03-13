@@ -19,7 +19,10 @@ jobs:
       with:
         distribution: 'liberica'
         java-version: '21'
-        
+
+    - name: Run PowerShell script for custom dependencies
+      run: pwsh -NoProfile -NoLogo -NonInteractive -ExecutionPolicy Bypass -File ./scripts/downloadDeps.ps1
+  
     - name: Cache local Maven repository
       uses: actions/cache@v4
       with:
