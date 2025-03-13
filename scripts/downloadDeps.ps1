@@ -24,6 +24,7 @@ if (-not (Test-Path -Path ($jcgmMvnPath -replace '\\\*(?=\\\*\.jar)', "\$jcgmLat
     foreach ($JCGMCoreJar in $LatestJCGMCoreJars) {
         Write-Verbose -Message "Downloading '$( $JCGMCoreJar.name )'" -Verbose
         $jarPath = $JCGMCoreJar.name
+        $jarPath = Join-Path -Path $PSScriptRoot -ChildPath $jarPath
         Invoke-WebRequest -Uri ($JCGMCoreJar.browser_download_url) -OutFile $jarPath -Verbose
         if ((Test-Path -Path $jarPath -PathType Leaf -Verbose) -and -not [string]::IsNullOrEmpty($jcgmLatestVersion)) {
             Write-Verbose -Message "Installing '$( $JCGMCoreJar.name )'" -Verbose
