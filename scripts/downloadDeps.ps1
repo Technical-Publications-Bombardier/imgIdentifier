@@ -17,13 +17,15 @@ $pomXml = Get-Item -Path "$PSScriptRoot\..\pom.xml"
 $pomVersion = $pom.project.properties.'jcgm.version'
 Write-Verbose -Message "Current POM version of jcgm is '$pomVersion'" -Verbose
 $jcgmMvnPath = "$env:USERPROFILE\.m2\repository\net\sf\jcgm\core\jcgm-core\*\*.jar"
-if (-not (Test-Path -Path ($jcgmMvnPath -replace '\\\*(?=\\\*\.jar)', "\$jcgmLatestVersion") -PathType Leaf -Verbose) -or $pomVersion -ne $jcgmLatestVersion) {
+$testJcgmLatest = [ScriptBlock]{ Test-Path -Path ($jcgmMvnPath -replace '\\\*(?=\\\*\.jar)', "\$jcgmLatestVersion") -PathType Leaf -Verbose }
+if (-not $(&$testJcgmLatest) -or $pomVersion -ne $jcgmLatestVersion) {
     Write-Verbose -Message 'Updating project jcgm version' -Verbose
     $pom.project.properties.'jcgm.version' = $jcgmLatestVersion
     $pom.Save(($pomXml.FullName))
     foreach ($JCGMCoreJar in $LatestJCGMCoreJars) {
         Write-Verbose -Message "Downloading '$( $JCGMCoreJar.name )'" -Verbose
         $jarPath = $JCGMCoreJar.name
+        $jarPath = Join-Path -Path $PSScriptRoot -ChildPath $jarPath
         Invoke-WebRequest -Uri ($JCGMCoreJar.browser_download_url) -OutFile $jarPath -Verbose
         if ((Test-Path -Path $jarPath -PathType Leaf -Verbose) -and -not [string]::IsNullOrEmpty($jcgmLatestVersion)) {
             Write-Verbose -Message "Installing '$( $JCGMCoreJar.name )'" -Verbose
@@ -39,19 +41,25 @@ if (-not (Test-Path -Path ($jcgmMvnPath -replace '\\\*(?=\\\*\.jar)', "\$jcgmLat
             )
             # Add classifier if it is a sources jar
             if ($JCGMCoreJar.name -like '*-sources.jar') {
-                $argsList += "-Dclassifier='sources'"
+                $argsList += "-Dclassifier=sources"
             }
 
             Write-Debug -Message "Arguments: $($argsList -join ' ')" -Debug
             # Use Start-Process to call mvn
-            Start-Process -FilePath 'mvn' -ArgumentList $argsList -Wait -NoNewWindow
+            $process = Start-Process -FilePath 'mvn' -ArgumentList $argsList -NoNewWindow -Wait -PassThru -RedirectStandardOutput "./maven-install.log" -RedirectStandardError "./maven-error.log"
         
-            if ($LASTEXITCODE -eq 0) {
+            if ($process.ExitCode -eq 0 -or $(&$testJcgmLatest)) {
+                foreach($line in Get-Content -Path "./maven-install.log") {
+                    Write-Verbose -Message $line -Verbose
+                }
                 Write-Verbose -Message "Successfully installed '$( $JCGMCoreJar.name )'" -Verbose
                 Remove-Item -Path $jarPath -Verbose
             }
             else {
                 Write-Error -Message "Failed to install '$( $JCGMCoreJar.name )' with ``& mvn install:install-file -Dfile="$jarPath" -DgroupId='net.sf.jcgm.core' -DartifactId='jcgm-core' -Dversion="$jcgmLatestVersion" -Dpackaging='jar'``"
+                foreach($line in Get-Content -Path "./maven-error.log") {
+                    Write-Error -Message $line
+                }
             }
         }
     }
