@@ -40,7 +40,7 @@ jobs:
         tag: ${{ github.ref_name }}  # Use the current tag as the release tag
         name: Release ${{ github.ref_name }}  # Set release name
         body: "This release includes the imgTools package. Download the ZIP file to use the tool."  # Release notes
-        artifacts: imageTools*-jar-with-dependencies.jar  # Path to the jar file
+        artifacts: ./target/imageTools*-jar-with-dependencies.jar  # Path to the jar file
         replacesArtifacts: true  # Replace existing artifacts if needed
         allowUpdates: true  # Allow updates to existing releases
         generateReleaseNotes: true # Have GitHub automatically create a changelog for the release based on commits between the current tag and the previous one.
