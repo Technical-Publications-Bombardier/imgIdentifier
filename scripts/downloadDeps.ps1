@@ -41,7 +41,7 @@ if (-not $(&$testJcgmLatest) -or $pomVersion -ne $jcgmLatestVersion) {
             )
             # Add classifier if it is a sources jar
             if ($JCGMCoreJar.name -like '*-sources.jar') {
-                $argsList += "-Dclassifier='sources'"
+                $argsList += "-Dclassifier=sources"
             }
 
             Write-Debug -Message "Arguments: $($argsList -join ' ')" -Debug
