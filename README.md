@@ -1,7 +1,7 @@
 # 🖼️ ImageTypeIdentifier
 
-This Java-based utility scans folders for image files and identifies their type—even when file extensions are missing—using signature-based detection. Perfect for batch processing and validating graphic assets.
-
+This Java-based utility scans folders for image files and identifies their type using signature-based detection when file extensions are missing (file ends in `.xxx`).
+ 
 ## 🚀 Getting Started
 
 ### Prerequisites
