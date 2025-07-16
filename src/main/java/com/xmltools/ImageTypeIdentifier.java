@@ -92,22 +92,39 @@ try(ProgressBar bar = new ProgressBar(String.format("Processing folder: '%s'", f
 
 	public static String getAIImageType(File file) {
 		String epsPattern = "%!?PS-Adobe-[\\d.]+\\s+EPSF-[\\d.]+";
-		// Use Pattern and Matcher for flexible matching
+
+		// First check: binary EPS header (magic bytes)
+		try (InputStream input = new FileInputStream(file)) {
+			byte[] magic = new byte[4];
+			if (input.read(magic) == 4) {
+				// Match binary EPS header C5 D0 D3 C6
+				if ((magic[0] & 0xFF) == 0xC5 &&
+						(magic[1] & 0xFF) == 0xD0 &&
+						(magic[2] & 0xFF) == 0xD3 &&
+						(magic[3] & 0xFF) == 0xC6) {
+					return "eps";
+				}
+			}
+		} catch (IOException e) {
+			System.err.println("Failed to read file bytes: " + file.getName());
+		}
+
+		// Second check: ASCII EPS header via regex
 		Pattern pattern = Pattern.compile(epsPattern);
 		try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 			String firstLine = reader.readLine();
-			firstLine += reader.readLine();  // Add the second line
-			// Sanitize the input by removing non-printable characters
-			firstLine = firstLine.replaceAll("[^\\x20-\\x7E]", ""); // Keep only printable ASCII chars
+			firstLine += reader.readLine();  // Append second line
+			firstLine = firstLine.replaceAll("[^\\x20-\\x7E]", "");  // Sanitize the input by removing non-printable characters
 			Matcher matcher = pattern.matcher(firstLine);
 			if (matcher.find()) {
 				return "eps";
 			} else {
-				return checkForCGM(file);
+				return checkForCGM(file);  // fallback
 			}
 		} catch (IOException e) {
-			System.err.println("Failed to read file: " + file.getName());
+			System.err.println("Failed to read file text: " + file.getName());
 		}
+
 		return null;
 	}
 
